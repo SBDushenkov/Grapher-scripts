@@ -100,34 +100,27 @@ Sub setAxes(ByRef axes As AutoAxes)
 		xLink.ToAxis <> yAxis.Name Or _
 		xLink.xPos <> False Or _
 		xLink.yPos <> True Or _
-		xLink.YPosOption <> grfPORightOrBottom Or _
-		xLink.XPosOffset <> 0 Or _
-		xLink.YPosOffset <> 0 _
+		xLink.YPosOption <> grfPORightOrBottom  _
 	Then
 		xLink.ToAxis = ""
 		xLink.xPos = False
 		xLink.yPos = True
 		xLink.ToAxis = yAxis.Name
 		xLink.YPosOption = grfPORightOrBottom
-		xLink.XPosOffset = 0
-		xLink.YPosOffset = 0
 	End If
 
 	If _
 		yLink.ToAxis <> xAxis.Name Or _
 		yLink.xPos <> True Or _
 		yLink.yPos <> False Or _
-		yLink.XPosOption <> grfPOLeftOrTop Or _
-		yLink.XPosOffset <> 0 Or _
-		yLink.YPosOffset <> 0 _
+		yLink.XPosOption <> grfPOLeftOrTop _
 	Then
 		yLink.ToAxis = ""
 		yLink.xPos = True
 		yLink.yPos = False
 		yLink.ToAxis = xAxis.Name
+		yLink.xPos = True
 		yLink.XPosOption = grfPOLeftOrTop
-		yLink.XPosOffset = 0
-		yLink.YPosOffset = 0
 	End If
 
 	setMainAxesLine(xAxis)
@@ -150,8 +143,50 @@ Sub setAxes(ByRef axes As AutoAxes)
 			grid.AtMajorTicks = False
 			grid.AtMinorTicks = False
 		End If
-		setFontNoColorChange(axis.title.Font, m_fontSizeAxisTitle)
-		setFontNoColorChange(axis.TickLabels.MajorFont, m_fontSizeAxisLabel)
+		setFontColorChange(axis.title.Font, m_fontSizeAxisTitle, axis.Line.foreColor)
+		setFontColorChange(axis.TickLabels.MajorFont, m_fontSizeAxisLabel, axis.Line.foreColor)
+
+		If j <= 4 Then
+			If axis.axisType = grfXAxis Then
+				Set xLink = axis.Link
+				If _
+					xLink.ToAxis <> yAxis.Name Or _
+					xLink.xPos <> True Or _
+					xLink.yPos <> True Or _
+					xLink.YPosOption <> grfPOLeftOrTop Or _
+					xLink.XPosOption <> grfPORightOrBottom _
+				Then
+					xLink.ToAxis = ""
+					xLink.xPos = True
+					xLink.yPos = True
+					xLink.ToAxis = yAxis.Name
+					xLink.XPosOption = grfPORightOrBottom
+					xLink.YPosOption = grfPOLeftOrTop
+				End If
+
+			End If
+			If axis.axisType = grfYAxis Then
+				Set yLink = axis.Link
+				If _
+					yLink.ToAxis <> xAxis.Name Or _
+					yLink.xPos <> True Or _
+					yLink.yPos <> True Or _
+					yLink.YPosOption <> grfPOLeftOrTop Or _
+					yLink.XPosOption <> grfPORightOrBottom _
+				Then
+					yLink.ToAxis = ""
+					yLink.xPos = True
+					yLink.yPos = True
+					yLink.ToAxis = xAxis.Name
+					yLink.XPosOption = grfPORightOrBottom
+					yLink.YPosOption = grfPOLeftOrTop
+				End If
+			End If
+			If axis.TickLabels.MajorSide <> grfTicksTopRight Or axis.TickLabels.MinorSide <> grfTicksTopRight Then
+				axis.TickLabels.MajorSide = grfTicksTopRight
+				axis.TickLabels.MinorSide = grfTicksTopRight
+			End If
+		End If
 	Next j
 End Sub
 
@@ -379,14 +414,10 @@ Sub setLegend(ByRef graph As AutoGraph)
 End Sub
 
 Sub setFont(ByRef font As Object, ByVal size As Integer)
-	If font.color <> m_fontColor Then
-		font.color = m_fontColor
-	End If
-	
-	setFontNoColorChange(font, size)
+	setFontColorChange(font, size, m_fontColor)
 End Sub
 
-Sub setFontNoColorChange(ByRef font As Object, ByVal size As Integer)
+Sub setFontColorChange(ByRef font As Object, ByVal size As Integer, fontColor As grfColor)
 	If _
 		font.face <> m_fontFace Or _
 		font.size <> size Or _
@@ -394,7 +425,8 @@ Sub setFontNoColorChange(ByRef font As Object, ByVal size As Integer)
 		font.Bold <> m_fontBold Or _
 		font.Italic <> m_fontItalic Or _
 		font.Underline <> m_fontUnderline Or _
-		font.StrikeThrough <> m_fontStrikethrough _
+		font.StrikeThrough <> m_fontStrikethrough Or _
+		font.color <> fontColor _
 	Then
 		font.face = m_fontFace
 		font.size = size
@@ -403,6 +435,7 @@ Sub setFontNoColorChange(ByRef font As Object, ByVal size As Integer)
 		font.Italic = m_fontItalic
 		font.Underline = m_fontUnderline
 		font.StrikeThrough = m_fontStrikethrough
+		font.color = fontColor
 	End If
 End Sub
 
