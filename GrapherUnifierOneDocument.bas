@@ -1,5 +1,12 @@
 Option Explicit
 
+'#Uses "Unify_AxisMinMax_TicksMarks_TickLabels_TitleText.bas"
+'#Uses "SupportFunctions.bas"
+'#Uses "Unify_PlotDataLimits.bas"
+
+Dim xAxisPattern As New Unify_AxisMinMax_TicksMarks_TickLabels_TitleText
+Dim plotLimits As New Unify_PlotDataLimits
+
 Const m_axisLineW As Double = 0.06
 Const m_axisColor As grfColor = grfColorBlack
 Const m_axisMajorW As Double = 0.04
@@ -22,27 +29,43 @@ Const m_fontItalic As Boolean = False
 Const m_fontUnderline As Boolean = False
 Const m_fontStrikethrough As Boolean = False
 
-Dim m_xAxis As AutoAxis
 Dim m_plot As AutoPlot
 Dim m_clipping As AutoClipping
-Dim m_xTickLabels As AutoAxisTickLabels
-Dim m_xTickMarks As AutoAxisTickMarks
 
 
-
+'**********************************************************************
+' Set X axis position = m_xAxisPos And length = m_xAxisLength
+' used only for main (first) axis in graph
+'**********************************************************************
 Sub setXAxisPosition(axis As AutoAxis)
-	If 	axis.xPos <> m_xAxisPos Or axis.length <> m_xAxisLength Then
+	If 	doubleEq(axis.xPos, m_xAxisPos) = False Or doubleEq(axis.length, m_xAxisLength) = False Then
 		axis.xPos = m_xAxisPos
 		axis.length = m_xAxisLength
 	End If
 End Sub
 
-Sub setAxesLineW(ByRef l As AutoLine)
-	If  l.width <> m_axisLineW Then
-		l.width = m_axisLineW
+Sub setSolidLine(ByRef l As AutoLine)
+	If  l.style <> "Solid" Then
+		l.style = "Solid"
 	End If
 End Sub
 
+
+'**********************************************************************
+' Set axis line width = m_axisLineW
+' used for all axes in graph
+'**********************************************************************
+Sub setAxesLineW(ByRef l As AutoLine)
+	If  doubleEq(l.width, m_axisLineW) = False Then
+		l.width = m_axisLineW
+	End If
+	setSolidLine(l)
+End Sub
+
+'**********************************************************************
+' Set axis: ticks = off, grid (major and minor) = on, grid lines width and color
+' used only for main axes in graph (first - X, second - Y)
+'**********************************************************************
 Sub setMainAxesLine(ByRef axis As AutoAxis)
 	Dim l As AutoLine
 
@@ -68,18 +91,18 @@ Sub setMainAxesLine(ByRef axis As AutoAxis)
 	End If
 
 	Set l = grid.MajorLine
-	If l.foreColor <> m_axisMajorColor Or l.width <> m_axisMajorW Then
+	If l.foreColor <> m_axisMajorColor Or doubleEq(l.width, m_axisMajorW) = False Then
 		l.foreColor = m_axisMajorColor
 		l.width = m_axisMajorW
 	End If
+	setSolidLine(l)
 
 	Set l = grid.MinorLine
-	If 	l.foreColor <> m_axisMinorColor Or l.width <> m_axisMinorW Then
+	If 	l.foreColor <> m_axisMinorColor Or doubleEq(l.width, m_axisMinorW) = False Then
 		l.foreColor = m_axisMinorColor
 		l.width = m_axisMinorW
 	End If
-
-
+	setSolidLine(l)
 End Sub
 
 Sub setAxes(ByRef axes As AutoAxes)
@@ -88,7 +111,7 @@ Sub setAxes(ByRef axes As AutoAxes)
 	Dim xAxis  As AutoAxis
 	Set xAxis = axes.Item(1)
 	Dim yAxis  As AutoAxis
-	Set yAxis = axes.Item(2)
+ 	Set yAxis = axes.Item(2)
 
 	setXAxisPosition(xAxis)
 	Dim xLink As AutoAxisLink
@@ -96,29 +119,31 @@ Sub setAxes(ByRef axes As AutoAxes)
 	Dim yLink As AutoAxisLink
 	Set yLink = yAxis.Link
 
+
 	If _
 		xLink.ToAxis <> yAxis.Name Or _
 		xLink.xPos <> False Or _
 		xLink.yPos <> True Or _
-		xLink.YPosOption <> grfPORightOrBottom  _
-	Then
-		xLink.ToAxis = ""
-		xLink.xPos = False
-		xLink.yPos = True
-		xLink.ToAxis = yAxis.Name
-		xLink.YPosOption = grfPORightOrBottom
-	End If
-
-	If _
+		xLink.length <> False Or _
+		xLink.YPosOption <> grfPORightOrBottom  Or _
 		yLink.ToAxis <> xAxis.Name Or _
 		yLink.xPos <> True Or _
 		yLink.yPos <> False Or _
+		yLink.length <> False Or _
 		yLink.XPosOption <> grfPOLeftOrTop _
 	Then
+		xLink.length = False
+		yLink.length = False
+		xLink.ToAxis = ""
 		yLink.ToAxis = ""
-		yLink.xPos = True
-		yLink.yPos = False
+		xLink.xPos = False
+		yLink.xPos = False
+
+		xLink.ToAxis = yAxis.Name
 		yLink.ToAxis = xAxis.Name
+
+		xLink.yPos = True
+		xLink.YPosOption = grfPORightOrBottom
 		yLink.xPos = True
 		yLink.XPosOption = grfPOLeftOrTop
 	End If
@@ -153,9 +178,11 @@ Sub setAxes(ByRef axes As AutoAxes)
 					xLink.ToAxis <> yAxis.Name Or _
 					xLink.xPos <> True Or _
 					xLink.yPos <> True Or _
+					xLink.length <> False Or _
 					xLink.YPosOption <> grfPOLeftOrTop Or _
 					xLink.XPosOption <> grfPORightOrBottom _
 				Then
+					xLink.length = False
 					xLink.ToAxis = ""
 					xLink.xPos = True
 					xLink.yPos = True
@@ -171,9 +198,11 @@ Sub setAxes(ByRef axes As AutoAxes)
 					yLink.ToAxis <> xAxis.Name Or _
 					yLink.xPos <> True Or _
 					yLink.yPos <> True Or _
+					yLink.length <> False Or _
 					yLink.YPosOption <> grfPOLeftOrTop Or _
 					yLink.XPosOption <> grfPORightOrBottom _
 				Then
+					yLink.length = False
 					yLink.ToAxis = ""
 					yLink.xPos = True
 					yLink.yPos = True
@@ -192,8 +221,10 @@ End Sub
 
 
 Sub Main
+	Debug.Clear
 	Dim app As Application
 	Set app = CreateObject("Grapher.Application")
+	Debug.Print("Application found (or created)")
 	app.Visible = True
 
 	Dim docs As Documents
@@ -201,176 +232,64 @@ Sub Main
 
 	Dim doc As Document
 	Set doc = docs.Active
-
+	Debug.Print("Active document set")
 	Dim shapes As AutoShapes
 	Set shapes = doc.Shapes
 
+	Dim t0, t1 As Double
+
 	Dim i As Integer
-	Dim iFirstGraph As Integer
-	iFirstGraph = -1
+	Dim iFirstGraph As Boolean
+	iFirstGraph = True
 	For i = 1 To shapes.Count
 		
 		If shapes.Item(i).Type = grfShapeGraph Then
 			Dim graph As AutoGraph
 			Set graph = shapes.Item(i)
 
+			Debug.Print("Working with graph " +graph.Name + " | " + str$(i))
 			Dim axes As AutoAxes
 			Set axes = graph.Axes
 
-			If iFirstGraph < 0 Then
-				iFirstGraph = i
-				initTicks(axes)
-				initPlot(graph)
+			If iFirstGraph = True Then
+				iFirstGraph = False
+				If graph.Axes.Count > 0 And graph.Plots.Count >0 Then
+					t0 = Timer
+					xAxisPattern.initialize(axes.Item(1), True)
+					t1 = Timer
+					Debug.Print("First graph init XAxis pattern | " + Str$(t1 - t0) + " s")
+					t0 = t1
+					plotLimits.initialize(graph.Plots.item(1))
+					t1 = Timer
+					Debug.Print("First graph init plot limist | " + Str$(t1 - t0) + " s")
+				End If
 			Else
-				setTicks(axes)
+				If graph.Axes.Count > 0 Then
+					t0 = Timer
+					xAxisPattern.unify(axes.Item(1))
+					t1 = Timer
+					Debug.Print("Unify XAxis | " + Str$(t1 - t0) + " s")
+				End If
 			End If
+			t0 = Timer
 			setAxes(axes)
+			t1 = Timer
+			Debug.Print("Set axes representation | " + Str$(t1 - t0) + " s")
+			t0 = t1
+
 			setLegend(graph)
+			t1 = Timer
+			Debug.Print("Set legend | " + Str$(t1 - t0) + " s")
+			t0 = t1
 			setGraph(graph)
-			setPlots(graph.Plots)
+			t1 = Timer
+			Debug.Print("Set graph | " + Str$(t1 - t0) + " s")
+			t0 = t1
+			plotLimits.unify(graph.Plots)
+			t1 = Timer
+			Debug.Print("Unify plots | " + Str$(t1 - t0) + " s")
 		End If
 	Next i
-End Sub
-
-Sub initPlot(ByRef graph As AutoGraph)
-	If graph.Plots.Count >0 Then
-		Set m_plot = graph.Plots(1)
-		Set m_clipping = m_plot.Clipping
-	End If
-End Sub
-
-Sub setPlots(ByRef plots As AutoPlots)
-	If Not m_plot Is Nothing Then
-			Dim i As Integer
-			For i = 1 To plots.Count
-				Dim plot As AutoPlot
-				Set plot = plots(i)
-				If _
-					plot.FirstRow <> m_plot.FirstRow Or _
-					plot.LastRow <> m_plot.LastRow Or _
-					plot.AutoFirstRow <> m_plot.AutoFirstRow Or _
-					plot.AutoLastRow <> m_plot.AutoLastRow _
-				Then
-					plot.FirstRow = m_plot.FirstRow
-					plot.LastRow = m_plot.LastRow
-					plot.AutoFirstRow = m_plot.AutoFirstRow
-					plot.AutoLastRow = m_plot.AutoLastRow
-				End If
-				Dim clipping As AutoClipping
-				Set clipping = plot.Clipping
-				clipping.DrawToLimits = m_clipping.DrawToLimits
-				If clipping.XMinMode <> clipping.XMinMode Then
-					clipping.XMinMode = m_clipping.XMinMode
-				End If
-				If clipping.XMinMode = grfClipCustom And clipping.xMin <> m_clipping.xMin Then
-					clipping.xMin = m_clipping.xMin
-				End If
-				If clipping.XMaxMode <> clipping.XMaxMode Then
-					clipping.XMaxMode = m_clipping.XMaxMode
-				End If
-				If clipping.XMaxMode = grfClipCustom And clipping.xMax <> m_clipping.xMax Then
-					clipping.xMax = m_clipping.xMax
-				End If
-			Next i
-	End If
-
-
-End Sub
-
-
-Sub initTicks(ByRef axes As AutoAxes)
-	Dim xAxis  As AutoAxis
-
-	Set xAxis = axes.Item(1)
-	Set m_xAxis = xAxis
-	Set m_xTickMarks = xAxis.Tickmarks
-	Set m_xTickLabels = xAxis.TickLabels
-End Sub
-
-Sub setTicks(ByRef axes As AutoAxes)
-	Dim xAxis  As AutoAxis
-	Set xAxis = axes.Item(1)
-	Dim yAxis  As AutoAxis
-	Set yAxis = axes.Item(2)
-
-	Dim xTickLabels As AutoAxisTickLabels
-	Set xTickLabels = xAxis.TickLabels
-
-	If xAxis.AutoMin <> m_xAxis.AutoMin Then
-		xAxis.AutoMin = m_xAxis.AutoMin
-	End If
-	If m_xAxis.AutoMin = False And  xAxis.Min <> m_xAxis.Min Then
-		xAxis.Min = m_xAxis.Min
-	End If
-
-	If xAxis.AutoMax <> m_xAxis.AutoMax Then
-		xAxis.AutoMax = m_xAxis.AutoMax
-	End If
-	If m_xAxis.AutoMax = False And xAxis.Max <> m_xAxis.Max Then
-		xAxis.Max = m_xAxis.Max
-	End If
-
-
-	Dim xlf As AutoLabelFormat
-	Set xlf = xTickLabels.MajorFormat
-
-	Dim _xlf As AutoLabelFormat
-	Set _xlf = m_xTickLabels.MajorFormat
-
-	If 	xlf.NumericFormat <> _xlf.NumericFormat Or _
-		xTickLabels.UseDateTimeFormat <> m_xTickLabels.UseDateTimeFormat Or _
-		xlf.DateTimeString <> _xlf.DateTimeString _
-	Then
-		xlf.NumericFormat = _xlf.NumericFormat
-		xTickLabels.UseDateTimeFormat = m_xTickLabels.UseDateTimeFormat
-		xlf.DateTimeString = _xlf.DateTimeString
-	End If
-
-	Dim xTickMarks As AutoAxisTickMarks
-	Set xTickMarks = xAxis.Tickmarks
-
-	If _
-		xTickMarks.DTSpacing  <> m_xTickMarks.DTSpacing Or _
-		xTickMarks.MajorSpacing <> m_xTickMarks.MajorSpacing Or _
-		xTickMarks.EnableDTSpacing <> m_xTickMarks.EnableDTSpacing Or _
-		xTickMarks.DTUnits <> m_xTickMarks.DTUnits _
-	Then
-		xTickMarks.DTSpacing = m_xTickMarks.DTSpacing
-		xTickMarks.MajorSpacing = m_xTickMarks.MajorSpacing
-		xTickMarks.EnableDTSpacing = m_xTickMarks.EnableDTSpacing
-		xTickMarks.DTUnits = m_xTickMarks.DTUnits
-	End If
-
-	If _
-		xTickMarks.FirstTickValue <> m_xTickMarks.FirstTickValue Or _
-		xTickMarks.FirstTickMode <> m_xTickMarks.FirstTickMode Or _
-		xTickMarks.StartAt <> m_xTickMarks.StartAt Or _
-		xTickMarks.StartAtAuto <> m_xTickMarks.StartAtAuto _
-	Then
-		xTickMarks.FirstTickValue = m_xTickMarks.FirstTickValue
-		xTickMarks.FirstTickMode = m_xTickMarks.FirstTickMode
-		xTickMarks.StartAt = m_xTickMarks.StartAt
-		xTickMarks.StartAtAuto = m_xTickMarks.StartAtAuto
-	End If
-
-	If _
-		xTickMarks.DTMinorSpacing <> m_xTickMarks.DTMinorSpacing Or  _
-		xTickMarks.DTUnits <> m_xTickMarks.DTUnits Or _
-		xTickMarks.EnableDTMinorSpacing <> m_xTickMarks.EnableDTMinorSpacing _
-	Then
-		xTickMarks.DTMinorSpacing = m_xTickMarks.DTMinorSpacing
-		xTickMarks.DTUnits = m_xTickMarks.DTUnits
-		xTickMarks.EnableDTMinorSpacing = m_xTickMarks.EnableDTMinorSpacing
-	End If
-	If 	xTickMarks.MinorDivision <> m_xTickMarks.MinorDivision Or xTickMarks.MinorDivision <> m_xTickMarks.MinorDivision Then
-		xTickMarks.MinorDivision = m_xTickMarks.MinorDivision
-		xTickMarks.MinorDivision = m_xTickMarks.MinorDivision
-	End If
-
-	If xAxis.title.Text <> m_xAxis.title.Text Then
-		xAxis.title.Text = m_xAxis.title.Text
-	End If
-	
 End Sub
 
 Sub setLegend(ByRef graph As AutoGraph)
@@ -450,13 +369,13 @@ Sub setGraphTitle (ByRef title As AutoGraphTitle, ByVal titleName As String)
 		If title.Position <> grfCenterTop Then
 			title.Position = grfCenterTop
 		End If
-		If title.xOffset <> 0 Then
-			title.xOffset = 0
+		If doubleEq(title.xOffset, 0.0) = False Then
+			title.xOffset = 0.0
 		End If
-		If title.yOffset <> 0 Then
+		If doubleEq(title.yOffset, 0.0) = False Then
 			title.yOffset = 0
 		End If
-		If title.angle <> 0 Then
+		If doubleEq(title.angle, 0.0) = False Then
 			title.angle = 0
 		End If
 End Sub
