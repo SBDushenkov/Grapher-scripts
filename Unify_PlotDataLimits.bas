@@ -47,6 +47,10 @@ Public Class Unify_PlotDataLimits
 			For i = 1 To plots.Count
 				Set plot = plots(i)
 				If plot.worksheet = m_Worksheet Then
+					If m_AutoLastRow > plot.LastRow Then
+						plot.LastRow = max(m_AutoLastRow, plot.LastRow) + m_AutoLastRow - m_FirstRow
+					End If
+
 					If plot.AutoFirstRow <> m_AutoFirstRow Then
 						plot.AutoFirstRow = m_AutoFirstRow
 					End If
@@ -63,10 +67,9 @@ Public Class Unify_PlotDataLimits
 
 					Set clipping = plot.Clipping
 
-					If clipping.DrawToLimits <> m_DrawToLimits Then
-						clipping.DrawToLimits = m_DrawToLimits
+					If m_xMin > clipping.xMax Then
+						clipping.xMax = max(m_xMax, clipping.xMax) + m_xMax - m_xMin
 					End If
-
 					If clipping.XMinMode <> m_XMinMode Then
 						clipping.XMinMode = m_XMinMode
 					End If
@@ -81,10 +84,17 @@ Public Class Unify_PlotDataLimits
 						clipping.xMax = m_xMax
 					End If
 
+					If clipping.DrawToLimits <> m_DrawToLimits Then
+						clipping.DrawToLimits = m_DrawToLimits
+					End If
 				End If
 			Next i
-		End If
-	End Sub
 
+		Else
+			Debug.Print "'AutoPlots' object is nothing"
+	
+		End If
+
+	End Sub
 
 End Class

@@ -25,7 +25,7 @@ Public Class Unify_AxisMinMax_TicksMarks_TickLabels_TitleText
 	Private m_DateTimeString As String
 
 	' label format NOT DateTime
-	Private m_NumericFormat As Boolean
+	Private m_NumericFormat As Long
 	Private m_Thousands As Boolean
 	Private m_prefix As String
 	Private m_postfix As String
