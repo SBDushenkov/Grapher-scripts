@@ -5,6 +5,13 @@ Option Explicit
 
 '#Uses "SupportFunctions.bas"
 
+'**********************************************************************
+' Class getting one axis as pattern end copy settings to specified axis
+' Works with 
+' - axis limits
+' - ticks limits and spacing 
+' - labels limits, format and spacing
+'**********************************************************************
 Public Class Unify_AxisMinMax_TicksMarks_TickLabels_TitleText
 	Private m_isPrimary As Boolean
 	' axis globale

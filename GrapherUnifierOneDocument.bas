@@ -44,6 +44,9 @@ Sub setXAxisPosition(axis As AutoAxis)
 	End If
 End Sub
 
+'**********************************************************************
+' Set linestyle to solid
+'**********************************************************************
 Sub setSolidLine(ByRef l As AutoLine)
 	If  l.style <> "Solid" Then
 		l.style = "Solid"
@@ -105,6 +108,11 @@ Sub setMainAxesLine(ByRef axis As AutoAxis)
 	setSolidLine(l)
 End Sub
 
+'**********************************************************************
+' Set position and link for primary (X, Y) axes and two secondary (X, Y) axes
+' Set axes label positions 
+' Call setMainAxesLine, setFontColorChange, setAxesLineW
+'**********************************************************************
 Sub setAxes(ByRef axes As AutoAxes)
 
 
@@ -219,7 +227,12 @@ Sub setAxes(ByRef axes As AutoAxes)
 	Next j
 End Sub
 
-
+'**********************************************************************
+' Get active application and document
+' Iterate through shapes and get every graph
+' Do setting for every graph found
+' Call setMainAxesLine, setFontColorChange, setAxesLineW
+'**********************************************************************
 Sub Main
 	Debug.Clear
 	Dim app As Application
@@ -292,6 +305,9 @@ Sub Main
 	Next i
 End Sub
 
+'**********************************************************************
+' Set legend title, font, colors and lines
+'**********************************************************************
 Sub setLegend(ByRef graph As AutoGraph)
 	Dim legends As AutoLegends
 	Set legends = graph.Legends
@@ -332,10 +348,16 @@ Sub setLegend(ByRef graph As AutoGraph)
 	Next i
 End Sub
 
+'**********************************************************************
+' Set font style and default font color
+'**********************************************************************
 Sub setFont(ByRef font As Object, ByVal size As Integer)
 	setFontColorChange(font, size, m_fontColor)
 End Sub
 
+'**********************************************************************
+' Set font style
+'**********************************************************************
 Sub setFontColorChange(ByRef font As Object, ByVal size As Integer, fontColor As grfColor)
 	If _
 		font.face <> m_fontFace Or _
@@ -358,6 +380,9 @@ Sub setFontColorChange(ByRef font As Object, ByVal size As Integer, fontColor As
 	End If
 End Sub
 
+'**********************************************************************
+' Set graph title look and position
+'**********************************************************************
 Sub setGraphTitle (ByRef title As AutoGraphTitle, ByVal titleName As String)
 		setFont(title.Font, m_fontSizeGraphTitle)
 		If title.text <> titleName Then
@@ -380,6 +405,9 @@ Sub setGraphTitle (ByRef title As AutoGraphTitle, ByVal titleName As String)
 		End If
 End Sub
 
+'**********************************************************************
+' Set common graph properties
+'**********************************************************************
 Sub setGraph(ByRef graph As AutoGraph)
 	setGraphTitle(graph.title, graph.Name)
 

@@ -5,8 +5,10 @@ Option Explicit
 
 '#Uses "SupportFunctions.bas"
 
-' this class working only with plots wit the same worksheet (set by initial plot)
-
+'**********************************************************************
+' Class getting one plot as pattern end copy settings to specified plots
+' Works with limits and clipping
+'**********************************************************************
 Public Class Unify_PlotDataLimits
 	Private m_Worksheet As String
 	Private m_plot As AutoPlot
